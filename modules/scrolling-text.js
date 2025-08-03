@@ -60,9 +60,6 @@ export class ScrollingText {
   scrollSpeed;
   repeatSpacing;
 
-  #renderActive = false;
-  #zero;
-
   #columnCount;
   columnSpacing;
 
@@ -77,8 +74,6 @@ export class ScrollingText {
   #resetCanvas() {
     this.#ctx.canvas.width = window.visualViewport.width;
     this.#ctx.canvas.height = window.visualViewport.height;
-
-    this.#zero = document.timeline.currentTime;
   }
 
   get #font() {
@@ -260,25 +255,12 @@ export class ScrollingText {
     this.#wordWrap = wordWrap;
   }
 
-  /**
-   * @type {boolean}
-   */
-  get renderActive() {
-    return this.renderActive;
-  }
-
-  set renderActive(renderActive) {
-    this.#renderActive = renderActive;
-    this.#resetCanvas();
-    requestAnimationFrame((t) => this.#animate(t));
-  }
-
-  #animate(timestamp) {
+  clear() {
     this.#ctx.clearRect(0, 0, this.#ctx.canvas.width, this.#ctx.canvas.height);
+  }
 
-    if (!this.#renderActive) {
-      return;
-    }
+  renderFrame(delta) {
+    this.clear();
 
     this.#ctx.font = this.#font;
     this.#ctx.textAlign = "center";
@@ -310,7 +292,7 @@ export class ScrollingText {
       (width - this.columnSpacing * (this.#columnCount - 1)) /
       this.#columnCount;
 
-    const scrollOffset = ((timestamp - this.#zero) * this.scrollSpeed) / 1000;
+    const scrollOffset = (delta * this.scrollSpeed) / 1000;
 
     const lineOffset = scrollOffset % columnHeight;
 
@@ -400,7 +382,5 @@ export class ScrollingText {
       }
       this.#ctx.restore();
     }
-
-    requestAnimationFrame((t) => this.#animate(t));
   }
 }

@@ -1,3 +1,4 @@
+import { RealTimeRenderer } from "./modules/real-time-renderer.js";
 import {
   DEFAULT_PADDING,
   DEFAULT_TEXT_SETTINGS,
@@ -31,6 +32,8 @@ const scrollingText = new ScrollingText(
 scrollingText.autoSizeFont = true;
 await loadSettings(scrollingText);
 
+const renderer = new RealTimeRenderer(scrollingText.renderFrame);
+
 document.getElementById("speed").value = scrollingText.scrollSpeed;
 
 const reader = new FileReader();
@@ -53,7 +56,8 @@ settingsEl.onsubmit = async (ev) => {
   const fileEl = ev.target.file;
   if (fileEl.files.length > 0) {
     reader.readAsText(fileEl.files[0]);
-    scrollingText.renderActive = true;
+    scrollingText.clear();
+    renderer.renderActive = true;
   }
 
   dialog.close();
@@ -65,14 +69,16 @@ canvas.ondblclick = () => {
 
 if (window.obsstudio) {
   window.addEventListener("obsSourceVisibleChanged", (e) => {
-    scrollingText.renderActive = e.detail.visible;
+    scrollingText.clear();
+    renderer.renderActive = e.detail.visible;
   });
 }
 
 const initialText = await loadText();
 if (initialText && initialText.length > 0) {
   scrollingText.text = initialText;
-  scrollingText.renderActive = true;
+  scrollingText.clear();
+  renderer.renderActive = true;
 } else {
   dialog.show();
 }
